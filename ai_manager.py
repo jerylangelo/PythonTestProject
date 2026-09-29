@@ -44,7 +44,7 @@ def build_prompt(record):
     Construct a clear, specific prompt from the product record dict.
     Instructs the model to return structured JSON.
     """
-    prompt = f"""You are an expert food retail waste-reduction analyst. Analyse the following product and return a JSON object with your assessment.
+    prompt = f"""You are an expert food retail waste-reduction analyst for a supermarket. Analyse the following product inventory record and return a JSON object with your assessment.
 
 PRODUCT DATA:
 - Product Name: {record.get("product_name", "Unknown")}
@@ -62,7 +62,7 @@ ANALYSIS INSTRUCTIONS:
 3. Predict how much of the stock is likely to sell before expiry WITHOUT a discount.
 4. Estimate waste cost if no action is taken (unsold quantity × price).
 5. Determine a risk score from 1 (low) to 10 (critical).
-6. Suggest a specific action plan.
+6. Suggest a realistic, practical in-store operational action plan for supermarket floor staff (e.g. apply markdown sticker, move to clearance shelf, bundle items, or prepare for food bank donation). Strictly do NOT suggest digital banners, online campaigns, or e-commerce marketing.
 
 RESPOND WITH ONLY THIS EXACT JSON STRUCTURE (no other text):
 {{
@@ -72,8 +72,8 @@ RESPOND WITH ONLY THIS EXACT JSON STRUCTURE (no other text):
     "estimated_unsold_units": <integer — quantity minus predicted demand>,
     "estimated_waste_cost": <float — estimated dollar value of wasted stock>,
     "risk_score": <integer 1-10>,
-    "action_plan": "<a specific 1-2 sentence action recommendation>",
-    "reasoning": "<brief explanation of the analysis>"
+    "action_plan": "<1 concise sentence stating practical in-store floor action: e.g. markdown sticker, clearance shelf, bundling, or donation. No marketing jargon.>",
+    "reasoning": "<1 concise sentence explaining the perishability, stock volume, and time-to-expiry factor>"
 }}"""
     return prompt
 
