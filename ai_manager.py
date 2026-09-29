@@ -14,7 +14,7 @@ import time
 # Configuration
 # ──────────────────────────────────────────────
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
-MODEL = "llama-3.3-70b-versatile"
+MODEL = "qwen/qwen3.8-27b"
 MAX_RETRIES = 2
 TIMEOUT_SECONDS = 30
 
@@ -111,7 +111,8 @@ def call_api(prompt):
 
     headers = {
         "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "User-Agent": "FreshSaver/1.0 (Python)"
     }
 
     for attempt in range(MAX_RETRIES + 1):
