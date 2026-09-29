@@ -12,8 +12,14 @@ data/*.tmp
 data/*.corrupt-*
 logs/
 
+# Environment (contains API keys)
+.env
+
 # OS / editor
 .DS_Store
 Thumbs.db
 .vscode/
 .idea/
+
+# Temp files
+_framework.txt
