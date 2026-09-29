@@ -1,9 +1,11 @@
 """
-main.py — Application entry point.
+main.py: Application entry point
 Orchestrates the four-module pipeline:
   io_manager → ai_manager → logic_manager → data_manager
-
-100% procedural — no class definitions.
+  
+No class definitions as per 100% procedural requirement.
+I tell you first before AI tells you:
+ - Python has a library called pydantic that allows you to force the AI model to respond to a specific schema (like the JSON requirement here). Don't use it though, your professor will instant fail you cus it fails the '100% procedural' rule 😄
 """
 
 import io_manager
@@ -16,18 +18,18 @@ def process_new_product(product_data):
     """
     Full pipeline for a new product:
     1. Calculate days until expiry (logic_manager)
-    2. Send to AI for analysis (ai_manager) — CORE ENGINE
+    2. Send to AI for analysis (ai_manager) - must fail if A
+    4. Route the record (logic_manager)I returns invalid/not present
     3. Apply business rules (logic_manager)
-    4. Route the record (logic_manager)
     5. Score the record (logic_manager)
     6. Save to file (data_manager)
     """
-    # Enrich with days-until-expiry
+    
+    # This was auto-generated - pretty sure not a requirement 
     product_data["days_until_expiry"] = logic_manager.calculate_days_until_expiry(
         product_data["expiry_date"]
     )
-
-    # ── AI CORE ENGINE — every record must pass through ──
+     
     io_manager.display_processing()
     success, ai_result = ai_manager.process_record(product_data)
 

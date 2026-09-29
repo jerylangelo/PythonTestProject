@@ -1,16 +1,10 @@
 """
-io_manager.py — Input / Output layer.
-ALL print() and input() calls in the entire codebase live here.
-Collects structured user input, validates, and returns clean typed dicts.
-Also contains all display functions.
+io_manager.py - Input / Output layer. All print() and input() calls in the entire codebase live here.
+Collects structured user input, validates, and returns clean typed dicts. Also contains all display functions.
 """
 
 from datetime import datetime, timedelta
 
-
-# ──────────────────────────────────────────────
-# Constants
-# ──────────────────────────────────────────────
 CATEGORIES = [
     "Dairy & Eggs",
     "Bakery",
@@ -36,10 +30,7 @@ MENU_OPTIONS = {
     "0": "Exit",
 }
 
-
-# ──────────────────────────────────────────────
-# Formatting helpers
-# ──────────────────────────────────────────────
+## Clear AI by the way. This is technically unnecessary and you can do this with basic print() statements, but all the input/output must stay within this io_manager.py.
 
 def _header(text):
     """Print a section header."""
@@ -70,9 +61,7 @@ def _info(text):
     print(f"  {text}")
 
 
-# ──────────────────────────────────────────────
-# Menu / navigation
-# ──────────────────────────────────────────────
+# Display Menu
 
 def display_welcome():
     """Show the application welcome banner."""
@@ -101,14 +90,11 @@ def display_menu():
     return choice
 
 
-# ──────────────────────────────────────────────
-# Input collection — returns clean typed dicts
-# ──────────────────────────────────────────────
+# Input collection
 
 def collect_product_input():
     """
-    Prompt the user for all product fields.
-    Validates type, range, and required fields — rejects and re-prompts on bad data.
+    Prompt the user for all product fields. Validates type, range, and required fields - rejects and re-prompts on bad data.
     Returns a clean, typed dict ready for ai_manager.
     """
     _header("Add New Product for Assessment")
@@ -137,7 +123,7 @@ def collect_product_input():
 
     category = CATEGORIES[category_idx - 1]
 
-    # Quantity (positive integer)
+    # Quantity (positive integer only)
     quantity = 0
     while quantity <= 0:
         raw = input("  Quantity in stock: ").strip()
@@ -146,7 +132,7 @@ def collect_product_input():
         else:
             _error("Quantity must be a positive whole number.")
 
-    # Price (positive float)
+    # Price (positive float only)
     price = 0.0
     while price <= 0:
         raw = input("  Current selling price ($): ").strip()
@@ -318,10 +304,6 @@ def collect_product_id(records, prompt_text="Enter product ID: "):
     return product_id
 
 
-# ──────────────────────────────────────────────
-# Display functions
-# ──────────────────────────────────────────────
-
 def display_processing():
     """Show a processing indicator."""
     print("\n  Sending product to AI for analysis...")
@@ -458,13 +440,9 @@ def display_api_error(error_msg):
 
 def display_goodbye():
     """Display exit message."""
-    print("\n  Thank you for using FreshSaver!")
+    print("\n  Thank you for using the app!")
     print("  Reducing food waste, one product at a time.\n")
 
-
-# ──────────────────────────────────────────────
-# Internal helpers
-# ──────────────────────────────────────────────
 
 def _ask_yes_no(prompt_text):
     """Ask a yes/no question, return bool."""

@@ -2,7 +2,7 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-# No external dependencies — stdlib only
+# No external dependencies needed.
 COPY *.py ./
 COPY .env* ./
 

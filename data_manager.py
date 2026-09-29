@@ -1,5 +1,5 @@
 """
-data_manager.py — Persistence layer.
+data_manager.py - Persistence layer.
 All data saved to / loaded from flat JSON files.
 Produces the same output across separate runs on the same input.
 """
@@ -9,10 +9,6 @@ import os
 import copy
 from datetime import datetime
 
-
-# ──────────────────────────────────────────────
-# File paths
-# ──────────────────────────────────────────────
 DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 PRODUCTS_FILE = os.path.join(DATA_DIR, "products.json")
 SALES_FILE = os.path.join(DATA_DIR, "sales_history.json")
@@ -24,15 +20,9 @@ def _ensure_data_dir():
         os.makedirs(DATA_DIR, exist_ok=True)
 
 
-# ──────────────────────────────────────────────
-# Core CRUD — products
-# ──────────────────────────────────────────────
-
 def save(record):
     """
-    Append a fully-processed product record to the JSON file.
-    Called *after* logic_manager has evaluated the record.
-    Returns the saved record (with generated id).
+    Append a fully-processed product record to the JSON file and returns the saved record (with generated id).
     """
     _ensure_data_dir()
     records = load()
@@ -52,17 +42,14 @@ def save(record):
 
 def load():
     """
-    Read and return all product records on startup.
-    Returns an empty list if the file does not exist or is corrupt.
-    Never crashes.
+    Read and return all product records on startup. Returns an empty list if the file does not exist or is corrupt. Never crashes.
     """
     return _read_json(PRODUCTS_FILE)
 
 
 def query(filter_fn):
     """
-    Accept a filter function and return matching product records.
-    Enables searching by any field.
+    Accept a filter function and return matching product records. Enables searching by any field.
     """
     records = load()
     results = []
@@ -78,8 +65,7 @@ def query(filter_fn):
 
 def update(record_id, updates):
     """
-    Update an existing product record by id.
-    Returns the updated record, or None if not found.
+    Update an existing product record by id. Returns the updated record, or None if not found.
     """
     records = load()
     updated_record = None
@@ -96,8 +82,7 @@ def update(record_id, updates):
 
 def delete(record_id):
     """
-    Delete a product record by id.
-    Returns True if deleted, False if not found.
+    Delete a product record by id. Returns True if deleted, False if not found.
     """
     records = load()
     new_records = [r for r in records if r.get("id") != record_id]
@@ -106,10 +91,6 @@ def delete(record_id):
         return True
     return False
 
-
-# ──────────────────────────────────────────────
-# Sales history
-# ──────────────────────────────────────────────
 
 def save_sale(sale_record):
     """Save a sale event to the sales history file."""
@@ -138,10 +119,6 @@ def query_sales(filter_fn):
             continue
     return results
 
-
-# ──────────────────────────────────────────────
-# Internal helpers
-# ──────────────────────────────────────────────
 
 def _read_json(filepath):
     """
@@ -185,7 +162,7 @@ def _write_json(filepath, data):
             with open(filepath, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2, ensure_ascii=False, default=str)
         except (IOError, OSError):
-            pass  # Graceful — never crash
+            pass # Never crashes
 
 
 def _backup_corrupt(filepath):

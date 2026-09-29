@@ -1,25 +1,16 @@
 """
-logic_manager.py — Domain brain.
 Applies business rules to AI-enriched product records.
 All decisions driven by the AI response from ai_manager.
 """
 
 from datetime import datetime, timedelta
 
-
-# ──────────────────────────────────────────────
-# Constants — business rules
-# ──────────────────────────────────────────────
 MAX_DISCOUNT_PCT = 70          # Never recommend 100% discount
 MIN_PRICE_FLOOR_PCT = 30       # Product must sell for at least 30% of original price
 NEAR_EXPIRY_DAYS = 7           # Products expiring within 7 days are "near expiry"
 CRITICAL_EXPIRY_DAYS = 2       # Products expiring within 2 days are "critical"
 MEMBERSHIP_POINTS_RATE = 0.05  # 5% of purchase value as membership points
 
-
-# ──────────────────────────────────────────────
-# Required functions (per framework)
-# ──────────────────────────────────────────────
 
 def evaluate(record):
     """
@@ -34,7 +25,7 @@ def evaluate(record):
     ai_data = record.get("ai_analysis", {})
     decision = {}
 
-    # ── Rule: expired products cannot be sold ──
+    # Rule 1: expired products cannot be sold
     days_left = record.get("days_until_expiry", 0)
     if days_left <= 0:
         decision["status"] = "EXPIRED"
@@ -53,7 +44,7 @@ def evaluate(record):
         decision["reasoning"] = "Product has passed its expiry date and must be removed."
         return decision
 
-    # ── Rule: products NOT near expiry get no discount ──
+    # Rule 2: products NOT near expiry get no discount
     if days_left > NEAR_EXPIRY_DAYS:
         decision["status"] = "OK"
         decision["can_sell"] = True
@@ -72,7 +63,7 @@ def evaluate(record):
         )
         return decision
 
-    # ── Near-expiry products: apply AI-driven discount ──
+    # Near-expiry products: apply AI-driven discount
     decision["status"] = "NEAR_EXPIRY"
     decision["can_sell"] = True
 
@@ -86,13 +77,13 @@ def evaluate(record):
         # Critical: use higher of AI suggestion or 50%, capped at MAX
         final_discount = max(ai_discount, 50)
     elif days_left <= CRITICAL_EXPIRY_DAYS:
-        # Close to expiry but AI says low urgency — still bump to at least 30%
+        # Close to expiry but AI says low urgency - still bump to at least 30%
         final_discount = max(ai_discount, 30)
     elif urgency in ("high", "critical") and risk_score >= 7:
-        # AI flagged high urgency with high risk — use AI discount as-is
+        # AI flagged high urgency with high risk - use AI discount as-is
         final_discount = ai_discount
     else:
-        # Normal near-expiry — use AI discount but ensure at least 10%
+        # Normal near-expiry - use AI discount but ensure at least 10%
         final_discount = max(ai_discount, 10)
 
     # Cap at maximum allowed
@@ -103,7 +94,7 @@ def evaluate(record):
     is_member = record.get("is_member", False)
 
     if has_existing_discount:
-        # Don't stack — override with 0 discount
+        # Don't stack - override with 0 discount
         final_discount = 0
         decision["action"] = (
             "ALREADY DISCOUNTED — existing promotion active. "
@@ -129,7 +120,7 @@ def evaluate(record):
 
     decision["final_price"] = final_price
 
-    # MULTI-CONDITION RULE 3: membership — no additional discount but earn points
+    # MULTI-CONDITION RULE 3: membership - no additional discount but earn points
     if is_member and has_existing_discount:
         decision["membership_points_eligible"] = True
         decision["membership_discount_applied"] = False
@@ -204,7 +195,7 @@ def score(record):
     else:
         days_penalty = 0
 
-    # Quantity factor — more stock = higher urgency
+    # Quantity factor - more stock = higher urgency
     quantity = record.get("quantity", 0)
     unsold = ai_data.get("estimated_unsold_units", 0)
     if quantity > 0 and unsold > 0:
@@ -250,10 +241,7 @@ def route(record):
 
     return "OK"
 
-
-# ──────────────────────────────────────────────
-# Helper utilities
-# ──────────────────────────────────────────────
+# Helpers
 
 def calculate_days_until_expiry(expiry_date_str):
     """Calculate days between today and the expiry date string (YYYY-MM-DD)."""

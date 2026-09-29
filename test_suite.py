@@ -1,8 +1,7 @@
 """
-test_logic.py — Automated test script.
+Automated test suite.
 Verifies core logic_manager functions independently of the live API.
-Uses hardcoded sample AI responses.
-Runs without a live API connection.
+Uses hardcoded sample AI responses and runs without a live API connection.
 Must pass cleanly inside the Docker container.
 """
 
@@ -14,10 +13,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import logic_manager
 
-
-# ──────────────────────────────────────────────
 # Test helpers
-# ──────────────────────────────────────────────
 _pass_count = 0
 _fail_count = 0
 

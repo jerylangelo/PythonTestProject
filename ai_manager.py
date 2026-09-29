@@ -1,18 +1,13 @@
 """
-ai_manager.py — Core AI engine.
-Every product record must pass through this module.
-Removing this file MUST break the application's main purpose.
-Uses Groq API with llama-3.3-70b-versatile for structured JSON responses.
+ai_manager.py - Core AI engine.
+Every product record must pass through this module. Uses Groq API
+Must create a GROQ_API_KEY first before using.
 """
 
 import os
 import json
 import time
 
-
-# ──────────────────────────────────────────────
-# Configuration
-# ──────────────────────────────────────────────
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 MODEL = "qwen/qwen3.8-27b"
 MAX_RETRIES = 2
@@ -34,10 +29,6 @@ def _get_api_key():
                         break
     return key
 
-
-# ──────────────────────────────────────────────
-# Core functions (required by framework)
-# ──────────────────────────────────────────────
 
 def build_prompt(record):
     """
@@ -72,7 +63,7 @@ RESPOND WITH ONLY THIS EXACT JSON STRUCTURE (no other text):
     "estimated_unsold_units": <integer — quantity minus predicted demand>,
     "estimated_waste_cost": <float — estimated dollar value of wasted stock>,
     "risk_score": <integer 1-10>,
-    "action_plan": "<1 concise sentence stating practical in-store floor action: e.g. markdown sticker, clearance shelf, bundling, or donation. No marketing jargon.>",
+    "action_plan": "<1 concise sentence stating practical in-store floor action such as a markdown sticker, clearance shelf, bundling, or donation. No marketing tactics needed.>",
     "reasoning": "<1 concise sentence explaining the perishability, stock volume, and time-to-expiry factor>"
 }}"""
     return prompt
@@ -80,9 +71,7 @@ RESPOND WITH ONLY THIS EXACT JSON STRUCTURE (no other text):
 
 def call_api(prompt):
     """
-    Send the prompt to the Groq API.
-    Catches connection errors, timeouts, and rate limits.
-    Logs errors — never crashes.
+    Send the prompt to the Groq API. Catches connection errors, timeouts, and rate limits. Logs errors but never crashes.
     Returns the raw response text, or None on failure.
     """
     import urllib.request
@@ -112,17 +101,12 @@ def call_api(prompt):
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
-        "User-Agent": "FreshSaver/1.0 (Python)"
+        "User-Agent": "python-requests/2.32.3" 
     }
 
     for attempt in range(MAX_RETRIES + 1):
         try:
-            req = urllib.request.Request(
-                GROQ_API_URL,
-                data=payload,
-                headers=headers,
-                method="POST"
-            )
+            req = urllib.request.Request(GROQ_API_URL, data=payload, headers=headers, method="POST")
             with urllib.request.urlopen(req, timeout=TIMEOUT_SECONDS) as resp:
                 body = json.loads(resp.read().decode("utf-8"))
                 raw_text = body["choices"][0]["message"]["content"]
@@ -136,7 +120,7 @@ def call_api(prompt):
                 pass
 
             if e.code == 429:
-                # Rate limited — back off and retry
+                # Rate limited, retry later
                 wait = (attempt + 1) * 5
                 time.sleep(wait)
                 continue
@@ -144,7 +128,7 @@ def call_api(prompt):
                 return None
 
         except urllib.error.URLError:
-            # Connection error — retry with backoff
+            # Connection error, retry with backoff
             if attempt < MAX_RETRIES:
                 time.sleep((attempt + 1) * 2)
                 continue
@@ -170,7 +154,7 @@ def parse_response(raw):
     # Remove markdown code fences if present
     if text.startswith("```"):
         lines = text.split("\n")
-        # Remove first and last lines (fences)
+        # Remove first and last lines which may be code blocks
         lines = [l for l in lines if not l.strip().startswith("```")]
         text = "\n".join(lines)
 
@@ -223,9 +207,9 @@ def validate_response(data):
 
         value = data[key]
 
-        # Type check
+        # Type check values
         if not isinstance(value, rules["type"]):
-            # Try to coerce
+            # Try to force if not the expected type
             try:
                 if rules["type"] == str:
                     value = str(value)
@@ -250,9 +234,8 @@ def validate_response(data):
 
         cleaned[key] = value
 
-    # Coerce numeric types to int where appropriate
-    for int_key in ["recommended_discount_pct", "predicted_demand_units",
-                     "estimated_unsold_units", "risk_score"]:
+    # Force numeric types to int where possible
+    for int_key in ["recommended_discount_pct", "predicted_demand_units", "estimated_unsold_units", "risk_score"]:
         if int_key in cleaned:
             cleaned[int_key] = int(round(cleaned[int_key]))
 
@@ -264,13 +247,12 @@ def validate_response(data):
 def process_record(record):
     """
     Full pipeline: build prompt → call API → parse → validate.
-    Returns (success, ai_data_or_error_msg).
-    This is the main entry point called by logic_manager.
+    Returns (success, ai_data_or_error_msg). This is the main entry point called by logic_manager.
     """
     prompt = build_prompt(record)
     raw = call_api(prompt)
     if raw is None:
-        return False, "API call failed — check connection and API key"
+        return False, "API call failed - check connection and API key"
 
     parsed = parse_response(raw)
     if parsed is None:
